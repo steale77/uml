@@ -1,4 +1,4 @@
-@@startuml test
+@startuml test
 
 steale -> yurla
 
@@ -6,4 +6,4 @@ yurla-> lkk
 
 
 
-@@enduml
+@enduml
