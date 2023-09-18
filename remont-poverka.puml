@@ -1,0 +1,50 @@
+@startuml remont-poverka
+autonumber
+
+
+actor "Пользователь" as user
+actor "Сотрудник абонотдела" as operator #LightBlue
+participant "Личный кабинет" as lkk #Blue
+participant "Сервис Пей" as servicepay #Magenta
+database "Биллинг" as firebird #OrangeRed
+database "АИС ВДГО" as ais_vdgo #Orange
+participant "АРМ оператора" as arm_operatora #Cyan
+actor "Специалист ВДГО" as operator_vdgo #Cyan
+
+
+
+        user ->lkk :Пользователь подает заявку через лк
+
+        operator ->lkk : или оператор регистрирует заявку в абонзале
+ 
+
+firebird -[#OrangeRed]-> lkk :передаются данные об абоненте (Адрес, ФИО, инфо по счетчику)
+lkk -> ais_vdgo : Запрос информации (дата номер договора ТО ВДГО)
+ais_vdgo-->lkk : данные по договру ТО ВДГО (дата, номер)
+
+lkk -[#DarkCyan]> arm_operatora :Заявка передается для обработки в АРМ оператора
+firebird -[#OrangeRed]-> arm_operatora :передаются информация об установленном оборудовании
+arm_operatora -> operator_vdgo :данные о поступившей заявке передаются юоператору ВДГО
+lkk -> ais_vdgo : Запрос информации оборудование, дата последнего ТО
+operator_vdgo -> operator_vdgo :оператор вдго проверяет заявку
+
+ais_vdgo -[#Orange]-> arm_operatora : передается информация из АИС ВДГО \n(дата и номер договора ТО ВДГО, \n дата последнего проведенного ТО, установленное оборудование)
+
+operator_vdgo -> ais_vdgo : Если заявка в порядке ,то передается в работу (статус "В работе")
+ais_vdgo -> ais_vdgo : Формируется счет на оплату
+ais_vdgo -[#Orange]> lkk : Информация счет на оплату (сумма НЕфискализированная)
+
+user -[#DarkGreen]>lkk :Оплата
+lkk -[#Blue]> servicepay :Оплата передается в сервис пей
+servicepay->servicepay : формируется фискальник
+servicepay -[#Magenta]> lkk : Информация по произведенной оплате \n(сумма фискализированная Экваринг)
+
+servicepay-[#Magenta]>ais_vdgo : документ оплата
+ais_vdgo -[#Orange]> lkk : Информация по произведенной оплате \n(сумма фискализированная КАССА)
+
+ais_vdgo -[#Orange]-> arm_operatora : Информация об оплате передется в АРМ оператора
+arm_operatora ---> operator_vdgo :Информирование. Услуга оплачена
+operator_vdgo -> operator_vdgo : Формирует наряд задание
+
+
+@enduml
