@@ -1,0 +1,14 @@
+@startuml fias
+
+database fias as dbfias
+database dadata as dbta
+database  innerbase as dbbill
+
+
+/'
+
+
+'/
+
+
+@enduml
